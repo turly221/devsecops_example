@@ -1,0 +1,6 @@
+[run]
+source = devsecops_example
+omit = 
+    tests/*
+    autoapp.py
+
