@@ -2,6 +2,7 @@ pipeline {
     agent {
         docker {
             image 'python:3.11-slim-buster'
+            args '-u root --privileged'
         }
     }
     environment {
@@ -9,13 +10,23 @@ pipeline {
         // add in jenkins credentials
         SCANTIST_IMPORT_URL = "https://api-v4staging.scantist.io/v2/scans/ci-scan/"
         // SCANTISTTOKEN = credentials('SCANTISTTOKEN')
+        FLASK_APP = "autoapp.py"
+        DATABASE_URL = "sqlite:////tmp/dev.db"
+        SECRET_KEY = "not-so-secret"
+        SEND_FILE_MAX_AGE_DEFAULT = "0"
+
     }
     stages {
         stage('linting and unit testing') {
             steps {
-                sh 'pip install -r requirements/dev.txt'
-                sh 'flask lint -c'
-                sh 'flask test'
+                sh '''
+                python -m venv .venv
+                . .venv/bin/activate
+                pip install -r requirements/dev.txt
+                apt-get update && apt-get install -y wget
+                flask lint -c
+                flask test
+                '''
             }
         }
         stage('sca scan') {
@@ -23,7 +34,7 @@ pipeline {
                 sh '''
                 export DEVSECOPS_IMPORT_URL=$SCANTIST_IMPORT_URL
                 export DEVSECOPS_TOKEN=$SCANTISTTOKEN
-                curl https://download.scantist.io/sca-bom-detect-v4.5.jar -o sca-bom-detect-v4.5.jar
+                wget -O sca-bom-detect-v4.5.jar https://download.scantist.io/sca-bom-detect-v4.5.jar
                 java -jar sca-bom-detect-v4.5.jar -pipRequirementFile prod.txt
                 '''
             }
