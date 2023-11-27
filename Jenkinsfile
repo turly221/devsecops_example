@@ -20,10 +20,12 @@ pipeline {
         }
         stage('sca scan') {
             steps {
-                sh 'export DEVSECOPS_IMPORT_URL=$SCANTIST_IMPORT_URL
-                    export DEVSECOPS_TOKEN=$SCANTISTTOKEN
-                    curl https://download.scantist.io/sca-bom-detect-v4.5.jar -o scantist-bom-detect.jar
-                    java -jar scantist-bom-detect.jar -pipRequirementFile prod.txt'
+                sh '''
+                export DEVSECOPS_IMPORT_URL=$SCANTIST_IMPORT_URL
+                export DEVSECOPS_TOKEN=$SCANTISTTOKEN
+                curl https://download.scantist.io/sca-bom-detect-v4.5.jar -o scantist-bom-detect.jar
+                java -jar scantist-bom-detect.jar -pipRequirementFile prod.txt
+                '''
             }
         }
         stage('publish to docker registry') {
