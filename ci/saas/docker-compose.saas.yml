@@ -1,0 +1,18 @@
+version: "3.6"
+
+x-default-volumes: &default_volumes
+  volumes:
+    - ./dev.db:/tmp/dev.db
+
+services:
+  flask-prod:
+    image: "devsecops_example-production:latest"
+    ports:
+      - "8080:5000"
+    environment:
+      FLASK_ENV: production
+      FLASK_DEBUG: 0
+      LOG_LEVEL: info
+      GUNICORN_WORKERS: 4
+    <<: *default_volumes
+
