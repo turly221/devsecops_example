@@ -6,19 +6,16 @@ pipeline {
     }
     environment {
         LOG_LEVEL = 'debug'
+        // add in jenkins credentials
         SCANTIST_IMPORT_URL = "https://api-v4staging.scantist.io/v2/scans/ci-scan/"
-        SCANTISTTOKEN = "xxxx"
+        SCANTISTTOKEN = credentials('SCANTISTTOKEN')
     }
     stages {
-        stage('dependencies') {
-            steps {
-                sh 'pip install -r requirements/dev.txt'
-            }
-        }
         stage('linting and unit testing') {
             steps {
-                sh 'flask lint'
-                sh 'flask test
+                sh 'pip install -r requirements/dev.txt'
+                sh 'flask lint -c'
+                sh 'flask test'
             }
         }
         stage('sca scan') {
